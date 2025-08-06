@@ -13,10 +13,16 @@ model_path = os.path.join(parent_dir, "model")
 save_train_path = os.path.join(parent_dir, "data", "processed", "training.csv")
 save_val_path = os.path.join(parent_dir, "data", "processed", "val.csv")
 
-nlp = spacy.load("en_core_web_sm")
-# name the index
-df_train = pd.read_csv(data_train_path, header=None, names = ["id", "entity", "sentiment", "content"])
-df_val = pd.read_csv(data_val_path, header=None, names = ["id", "entity", "sentiment", "content"])
+def normalize_text(text):
+    if isinstance(text, str):
+        text = text.lower()
+        re.sub(r'@\w+', '', text)
+        text = re.sub(r'[^a-zA-Z\s]', ' ', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+    else:
+        return ''
+        
 
 def clean_text(text):
     doc = nlp(text)
@@ -34,9 +40,7 @@ def label_sentiment(df):
 
 def preprocess_data(df):
     
-    texts = df['content'].apply(
-        lambda x : re.sub(r'[^a-zA-Z\s]', ' ', x.lower())
-    ).tolist()
+    texts = df['content'].apply(normalize_text).tolist()
     
     df['text'] = [clean_text(doc) for doc in nlp.pipe(texts, batch_size=50, n_process=2)]
     
@@ -49,24 +53,25 @@ def preprocess_data(df):
     
     return df, le
 
-df_train, le = preprocess_data(df_train)
-df_val = preprocess_data(df_val)
+if __name__ == "__main__":
+    print("Processing")
+    nlp = spacy.load("en_core_web_sm")
+    # name the index
+    df_train = pd.read_csv(data_train_path, header=None, names = ["id", "entity", "sentiment", "content"])
+    df_val = pd.read_csv(data_val_path, header=None, names = ["id", "entity", "sentiment", "content"])
 
-# save processed data
-df_train.to_csv(save_train_path, index=False)
-df_val.to_csv(save_val_path, index= False)
+    df_train.dropna()
+    df_val.dropna()
+    print("Done Drop NaN")
+    print("Process Train")
+    df_train, le = preprocess_data(df_train)
+    print("Process Val")
+    df_val, temp = preprocess_data(df_val)
 
-# save label encoder
-joblib.dump(le, os.path.join(model_path, "label_encoder.pkl"))
+    print("Done process")
+    # save processed data
+    df_train.to_csv(save_train_path, index=False)
+    df_val.to_csv(save_val_path, index= False)
 
-
-
-
-
-    
-
-
-    
-    
-    
-    
+    # save label encoder
+    joblib.dump(le, os.path.join(model_path, "label_encoder.pkl"))
