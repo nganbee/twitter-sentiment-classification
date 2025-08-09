@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from src import inference as inf
 import os
 import joblib, spacy
+from fastapi.staticfiles import StaticFiles
 
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 model_path = os.path.join(base_dir, "model")
@@ -18,6 +19,7 @@ nlp = spacy.load("en_core_web_sm")
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class InputData(BaseModel):
     text: Optional[str] = None

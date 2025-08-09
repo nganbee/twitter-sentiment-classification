@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Sentiment Classification</title></head>
+<head>
+    <meta charset="utf-8">
+    <title>Sentiment Classification</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
 <body>
-  <input id="textInput" placeholder="Nhập câu...">
-  <button type="button" onclick="predict()">Dự đoán</button>
-  <p>Kết quả: <span id="result"></span></p>
-
-  <script>
+    <div class="container">
+        <h1>Sentiment Prediction</h1>
+        <input type="text" id="textInput" placeholder="Enter a text...">
+        <button onclick="predict()">Predict</button>
+        <p>Result: <span id="result" class = ""></span></p>
+    </div>
+<script>
     async function predict() {
-      const text = document.getElementById("textInput").value.trim();
-      const res = await fetch("/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }) 
-      });
-      const data = await res.json();
-      const output = Array.isArray(data.predictions)
-        ? data.predictions.join(", ")
-        : data.prediction;
-      document.getElementById("result").textContent = output ?? "(no result)";
+        const text = document.getElementById("textInput").value.trim();
+        if (!text) {
+            document.getElementById("result").textContent = "(Vui lòng nhập câu)";
+            document.getElementById("result").className = "";
+            return;
+        }
+
+        const res = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }) 
+        });
+
+        const data = await res.json();
+        const output = Array.isArray(data.predictions) ? data.predictions.join(", ") : data.prediction;
+
+        const resultEl = document.getElementById("result");
+        document.getElementById("result").textContent = output ?? "(no result)";
+
+        resultEl.className = "";
+        if (output?.toLowerCase() === "positive") {
+            resultEl.classList.add("positive");
+        } else if (output?.toLowerCase() === "negative") {
+            resultEl.classList.add("negative");
+        } else if (output?.toLowerCase() === "neutral") {
+            resultEl.classList.add("neutral");
+        }
     }
-  </script>
+</script>
 </body>
 </html>
 
