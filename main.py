@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
-from typing import List, Union
+from typing import List, Optional
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from src import inference as inf
 import os
 import joblib, spacy
@@ -15,15 +17,23 @@ vectorizer = joblib.load(os.path.join(model_path, "vectorizer.pkl"))
 nlp = spacy.load("en_core_web_sm")
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
-class Items(BaseModel):
-    texts: Union[List[str], str]
+class InputData(BaseModel):
+    text: Optional[str] = None
+    texts: Optional[List[str]] = None
+    
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/predict")
-def predict(items: Items):
-    texts = items.texts if isinstance(items.texts, list) else [items.texts]
-    X_clean = inf.preprocess_texts(texts, nlp)
-    X_vec   = vectorizer.transform(X_clean)
-    y_pred  = model.predict(X_vec)
-    labels  = le.inverse_transform(y_pred)
-    return {"predictions": labels.tolist()}
+def predict_api(data: InputData):
+    if data.text is not None:
+        items = [data.text]
+    elif data.texts is not None:
+        items = data.texts
+    else:
+        raise HTTPException(status_code=422, detail="Provide 'text' or 'texts'.")
+    labels = inf.predict(items)
+    return {"predictions": [str(x) for x in labels]}

@@ -27,5 +27,5 @@ def predict(texts):
     X_vec = vectorizer.transform(X_clean)
     y_pred = model.predict(X_vec)
     
-    return le.inverse_transform(y_pred), X_clean
+    return le.inverse_transform(y_pred)
     

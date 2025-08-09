@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Sentiment Classification</title></head>
+<body>
+  <input id="textInput" placeholder="Nhập câu...">
+  <button type="button" onclick="predict()">Dự đoán</button>
+  <p>Kết quả: <span id="result"></span></p>
+
+  <script>
+    async function predict() {
+      const text = document.getElementById("textInput").value.trim();
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }) 
+      });
+      const data = await res.json();
+      const output = Array.isArray(data.predictions)
+        ? data.predictions.join(", ")
+        : data.prediction;
+      document.getElementById("result").textContent = output ?? "(no result)";
+    }
+  </script>
+</body>
+</html>
+
