@@ -1,11 +1,10 @@
 import pandas as pd
 import os
 from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.layers import Embedding, LSTM, Dense, Bidirectional, Dropout
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.callbacks import EarlyStopping
+from keras.layers import Embedding, LSTM, Dense, Bidirectional, Dropout
+from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.text import Tokenizer
+from keras.callbacks import EarlyStopping
 
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 parent_dir = os.path.dirname(base_dir)
