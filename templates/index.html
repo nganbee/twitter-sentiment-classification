@@ -10,36 +10,41 @@
         <h1>Sentiment Prediction</h1>
         <input type="text" id="textInput" placeholder="Enter a text...">
         <button onclick="predict()">Predict</button>
-        <p>Result: <span id="result" class = ""></span></p>
+        <div class="results-box" style="margin-top: 20px;">
+            <p><strong>SVC Model:</strong> <span id="svc-result"></span></p>
+            <p><strong>BiLSTM Model:</strong> <span id="lstm-result"></span></p>
+        </div>
     </div>
 <script>
     async function predict() {
         const text = document.getElementById("textInput").value.trim();
-        if (!text) {
-            document.getElementById("result").textContent = "(Vui lòng nhập câu)";
-            document.getElementById("result").className = "";
-            return;
-        }
+        if (!text) return;
 
-        const res = await fetch("/predict", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text }) 
-        });
+        // Hiển thị trạng thái đang xử lý (vì BiLSTM load hơi lâu)
+        document.getElementById("svc-result").textContent = "Loading...";
+        document.getElementById("lstm-result").textContent = "Loading...";
 
-        const data = await res.json();
-        const output = Array.isArray(data.predictions) ? data.predictions.join(", ") : data.prediction;
+        try {
+            const res = await fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text }) 
+            });
 
-        const resultEl = document.getElementById("result");
-        document.getElementById("result").textContent = output ?? "(no result)";
+            const data = await res.json();
 
-        resultEl.className = "";
-        if (output?.toLowerCase() === "positive") {
-            resultEl.classList.add("positive");
-        } else if (output?.toLowerCase() === "negative") {
-            resultEl.classList.add("negative");
-        } else if (output?.toLowerCase() === "neutral") {
-            resultEl.classList.add("neutral");
+            const svcEl = document.getElementById("svc-result");
+            const lstmEl = document.getElementById("lstm-result");
+
+            svcEl.textContent = data.svc;
+            lstmEl.textContent = data.bilstm;
+
+            svcEl.className = data.svc.toLowerCase();
+            lstmEl.className = data.bilstm.toLowerCase();
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Không thể kết nối tới server!");
         }
     }
 </script>

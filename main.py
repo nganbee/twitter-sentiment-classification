@@ -7,6 +7,8 @@ from src import inference as inf
 import os
 import joblib, spacy
 from fastapi.staticfiles import StaticFiles
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 model_path = os.path.join(base_dir, "models")
@@ -15,7 +17,13 @@ model_path = os.path.join(base_dir, "models")
 le = joblib.load(os.path.join(model_path, "label_encoder.pkl"))
 model = joblib.load(os.path.join(model_path, "model_svc.pkl"))
 vectorizer = joblib.load(os.path.join(model_path, "vectorizer.pkl"))
+
+lstm_model = load_model(os.path.join(model_path, "model_bilstm.keras"))
+tokenizer = joblib.load(os.path.join(model_path, "tokenizer.pkl"))
+
 nlp = spacy.load("en_core_web_sm")
+
+templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -27,15 +35,25 @@ class InputData(BaseModel):
     
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request, 
+        name="index.html"
+    )
 
 @app.post("/predict")
 def predict_api(data: InputData):
-    if data.text is not None:
-        items = [data.text]
-    elif data.texts is not None:
-        items = data.texts
-    else:
-        raise HTTPException(status_code=422, detail="Provide 'text' or 'texts'.")
-    labels = inf.predict(items)
-    return {"predictions": [str(x) for x in labels]}
+    if not data.text:
+        raise HTTPException(status_code=422, detail="Provide 'text'.")
+    
+    svc_label = inf.predict([data.text])[0] 
+
+    seq = tokenizer.texts_to_sequences([data.text])
+    padded = pad_sequences(seq, maxlen=50, padding='post')
+    pred_probs = lstm_model.predict(padded)
+    lstm_idx = pred_probs.argmax(axis=1)[0]
+    lstm_label = le.inverse_transform([lstm_idx])[0]
+
+    return {
+        "svc": str(svc_label),
+        "bilstm": str(lstm_label)
+    }
