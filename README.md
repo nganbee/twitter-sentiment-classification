@@ -41,7 +41,25 @@ To ensure the best performance for the API, we benchmarked two distinct approach
 └── README.md
 ```
 
+## Model Evaluation and Comparision
+
+| Model | Accuracy | Macro F1-Score | Weighted F1-Score
+| :--- | :--- | :--- | :--- |
+| **SVC (Baseline)** | 92% | 0.92 | 0.92 | 
+| **BiLSTM** | 95% | 0.94 | 0.95 |
+
+- Deep Learning Advantage: The BiLSTM model achieves approximately a 3% accuracy improvement over the SVC baseline. In a production environment, this margin is critical for significantly reducing misclassifications when processing large-scale Twitter datasets, which are typically characterized by high noise levels and heavy use of slang.
+
+- Robustness: BiLSTM demonstrates superior stability across all target classes (0, 1, 2). Most notably, it maintains a high F1-score of 0.93 on the most challenging category (Class 2), compared to 0.90 achieved by the SVC model.
+
+- Deployment Strategy:
+
+    - Priority on Speed & Simplicity: SVC is the optimal choice due to its low computational overhead and rapid inference times.
+
+    - Priority on Maximum Accuracy: BiLSTM is the indispensable solution for capturing deep semantic nuances and context within the text.
+
 ## How to run
+### Option 1: Run locally
 1. **Clone the repository**
 ```bash
 git clone https://github.com/nganbee/twitter-sentiment-classification.git
@@ -65,3 +83,18 @@ venv\Scripts\activate
 ```bash
 uvicorn main:app --reload
 ```
+
+### Option 2: Run with Docker
+1. **Clone the repository**
+```bash
+git clone https://github.com/nganbee/twitter-sentiment-classification.git
+cd twitter-sentiment-classification
+```
+2. **Build and run with Docker**
+```bash
+docker-compose up --build
+```
+
+3. **Access the web demo**  
+
+- API: http://localhost:8000
