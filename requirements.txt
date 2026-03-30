@@ -1,0 +1,10 @@
+pandas
+uvicorn
+tensorflow==2.19.0
+spacy==3.8.7
+scikit-learn==1.16.1
+joblib
+pickle
+keras==3.11.2
+fastapi
+pydantic 
