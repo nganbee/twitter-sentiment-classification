@@ -9,7 +9,7 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(base_dir)
 data_train_path = os.path.join(parent_dir, "data", "raw", "twitter_training.csv")
 data_val_path = os.path.join(parent_dir, "data", "raw", "twitter_validation.csv")
-model_path = os.path.join(parent_dir, "model")
+model_path = os.path.join(parent_dir, "models")
 save_train_path = os.path.join(parent_dir, "data", "processed", "training.csv")
 save_val_path = os.path.join(parent_dir, "data", "processed", "val.csv")
 

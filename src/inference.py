@@ -4,7 +4,7 @@ import os
 
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
 parent_dir = os.path.dirname(base_dir)
-model_path = os.path.join(parent_dir, "model")
+model_path = os.path.join(parent_dir, "models")
 
 # Load label, model, vectorizer
 le = joblib.load(os.path.join(model_path, "label_encoder.pkl"))

@@ -9,7 +9,7 @@ import joblib, spacy
 from fastapi.staticfiles import StaticFiles
 
 base_dir = os.path.dirname(os.path.abspath(__file__)) 
-model_path = os.path.join(base_dir, "model")
+model_path = os.path.join(base_dir, "models")
 
 # Load label, model, vectorizer
 le = joblib.load(os.path.join(model_path, "label_encoder.pkl"))
